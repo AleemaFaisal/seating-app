@@ -1,0 +1,83 @@
+.body
+{
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-paper
+{
+  position: relative;
+  top: 10rem;
+  margin: 0 auto;
+  height: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  align-items: center;
+  padding: 10px;
+}
+
+.row
+{
+  margin: 25px auto;
+}
+
+.seat
+{
+  margin: 5px;
+  padding: 5px;
+  width: 40px;
+}
+
+.form-modal
+{
+  border: 2px solid green;
+}
+
+.selector{
+  display: flex;
+  gap: 5px;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+}
+.selector input {
+  display: none!important;
+}
+
+.selector input[type=checkbox] + label {
+  display: inline-block;
+  background: #dddddd;
+  margin-right: 3px;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.selector input[type=checkbox]:checked + label {
+  background: rgb(0, 119, 255);
+  color: #ffffff;
+}
+
+.weekDays input[type=checkbox] + label
+{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.months input[type=checkbox] + label
+{
+  width: 60px;
+  height: 40px;
+  border-radius: 25px;
+}
+
+.booking-button {
+  margin-top: 10px auto;
+}
+
+.input-error
+{
+  color: red;
+}
