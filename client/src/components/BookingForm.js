@@ -9,6 +9,7 @@ import { useState, useContext } from 'react';
 import { Toolbar, Typography } from '@mui/material';
 import { userContext } from '../contexts/userContext';
 import { selectedHallContext } from '../contexts/selectedHallContext';
+import { hallDataContext } from '../contexts/hallDataContext';
 
 
 function BookingForm({seatNum, setOpen})
@@ -19,6 +20,8 @@ function BookingForm({seatNum, setOpen})
     const [monthError, setMonthError] = useState(null);
     const [response, setResponse] = useState(null);
     const user = useContext(userContext);
+    const {setHallData} = useContext(hallDataContext);
+
 
     const hallName = useContext(selectedHallContext);
     console.log(user);
@@ -62,7 +65,7 @@ function BookingForm({seatNum, setOpen})
             setMonthError("Pick at least one month.");
             return;
         }
-        const url = "http://localhost:5000/halls/" + "Kayak/" + seatNum;
+        const url = "http://localhost:5000/halls/" + hallName + "/" + seatNum;
         const res = await fetch(url, {
             method: "POST",
             body: JSON.stringify({
@@ -74,9 +77,20 @@ function BookingForm({seatNum, setOpen})
                 'Content-Type': 'application/json'
               },
         });
+        console.log("res: ", res);
         res.text()
-        .then(msg => setResponse(msg));
+        .then(msg => setResponse({msg: msg, status: res.status}));   
     }
+
+        const handleCloseResponse = () =>
+        {
+            setOpen(false); 
+            setResponse(null);
+            if (response.status == 200)
+            {
+                setHallData(null);
+            }
+        };
         
         const dayInputs = ['M', 'T', 'W', 'Th', 'F', 'S', 'S'].map( (day, index) =>
             <CheckboxFormInput id={"d" + index} value={(index==6) ? 0 : index+1} className="weekday" handleClick={handleDayClick} label={day} key={"d" + index} />
@@ -112,7 +126,7 @@ function BookingForm({seatNum, setOpen})
             return (
                 <div>
                     <h1>{response}</h1>
-                    <Button variant="contained" onClick={() => {setOpen(false); setResponse(null); window.location.reload();}}>OK</Button>
+                    <Button variant="contained" onClick={handleCloseResponse}>OK</Button>
                 </div>
             )
         }

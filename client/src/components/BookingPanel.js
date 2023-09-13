@@ -43,7 +43,7 @@ function BookingPanel({drawerWidth})
         >
         <Toolbar />
         {hallData && 
-        <hallDataContext.Provider value={hallData.seats} >
+        <hallDataContext.Provider value={{seatsData:hallData.seats, setHallData: setHallData}} >
           {Hall}
         </hallDataContext.Provider>
         }

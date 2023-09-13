@@ -4,7 +4,8 @@ import { useContext } from 'react';
 
 function HallRow({totalSeats, startSeatNum})
 {
-    const seatsData = useContext(hallDataContext);
+    const {seatsData} = useContext(hallDataContext);
+    
 
     const seats = [];
     const seatsPerRow = totalSeats/2;

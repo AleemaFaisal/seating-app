@@ -1,10 +1,11 @@
 import { Button } from '@mui/base/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Modal from '@mui/material/Modal';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import BookingForm from './BookingForm';
+
 
 function Seat({seatNum, data})
 {
