@@ -12,6 +12,8 @@ const AGE =  2*24*60*60;
 
 router.post('/', async (req,res) => {
 
+    console.log("reached server");
+
     //silent auto log-in request
     const {appToken} = req.body;
     if (appToken)
@@ -21,7 +23,7 @@ router.post('/', async (req,res) => {
         .catch(err => {console.log(err); res.status(500).send("server error")});
     }
 
-    //create new user and log in request
+    //create new user if needed and log in request
     const {googleToken} = req.body;
     if (googleToken)
     {
@@ -33,7 +35,17 @@ router.post('/', async (req,res) => {
         const decodedToken = jwt_decode(googleToken);
         console.log("decodedToken: ", decodedToken);
 
-        //save the user to db with token
+        //check if user already exists - update tokens and return
+        // const returningUser = await User.findOne({email: decodedToken.email}).exec()
+        // .catch(err => res.status(500).send(err));
+
+        // returningUser.googleToken = googleToken;
+        // returningUser.appToken = appToken;
+        // await returningUser.save()
+        // .then( updatedUser => res.status(200).send(updatedUser))
+        // .catch(err => res.status(500).send(err));
+
+        //if new, save the user to db with tokens
         const newUser = new User({
             name: decodedToken.name,
             email: decodedToken.email,
@@ -42,13 +54,13 @@ router.post('/', async (req,res) => {
         });
 
         await newUser.save()
-        .then( savedUser => res.status(200).send(savedUser))
-        .catch(err => {console.log(err); res.status(500).send(err)});
+        .then( savedUser => res.status(200).send(savedUser));
+        //catch(err => {console.log(err); res.status(500).send(err)});
     }
-    else
-    {
-        res.status(400).send("unauthorized request");
-    }
+    // else
+    // {
+    //     res.status(400).send("unauthorized request");
+    // }
 })
 
 
