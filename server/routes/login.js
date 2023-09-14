@@ -1,24 +1,53 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const jwt_decode = require('jwt-decode');
+const { OAuth2Client } = require('google-auth-library');
+const User = require('../models/UserSchema');
 
-//temporary auth route to be replaced with google api later
+const CLIENT_ID= '61992319078-23ghu3p9na3vjc5qi4fg3mcr2mpgbncp.apps.googleusercontent.com';
+const KEY = "fTC4tyqupCcbCH0";
+const AGE =  2*24*60*60;
 
-router.post('/', (req,res) => {
-    const {email, password} = req.body;
-    const format = /@arbisoft\.com$/;
-    const valid = format.test(email);
-    if (valid)
+
+router.post('/', async (req,res) => {
+
+    //silent auto log-in request
+    const {appToken} = req.body;
+    if (appToken)
     {
-        const age = 2*60*60;
-        const username = email.substr(email.length - 13);
-        const token = jwt.sign({username}, 'seating-auth-secret-key', {expiresIn: age });
-        res.cookie("jwt", token, {maxAge: age*1000, httpOnly: true});
-        res.status(200).send('login success');
+        await User.findOne({appToken}).exec()
+        .then(existingUser => res.status(200).send(existingUser))
+        .catch(err => {console.log(err); res.status(500).send("server error")});
+    }
+
+    //create new user and log in request
+    const {googleToken} = req.body;
+    if (googleToken)
+    {
+        //create apptoken from the google jwt token
+        const payload = googleToken.credential;
+        const appToken = jwt.sign({payload}, KEY, {expiresIn: AGE}); 
+
+        //decode data from the google token
+        const decodedToken = jwt_decode(googleToken);
+        console.log("decodedToken: ", decodedToken);
+
+        //save the user to db with token
+        const newUser = new User({
+            name: decodedToken.name,
+            email: decodedToken.email,
+            appToken: appToken,
+            googleToken: googleToken
+        });
+
+        await newUser.save()
+        .then( savedUser => res.status(200).send(savedUser))
+        .catch(err => {console.log(err); res.status(500).send(err)});
     }
     else
     {
-        res.status(400).send('Invalid Email');
+        res.status(400).send("unauthorized request");
     }
 })
 

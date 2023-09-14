@@ -4,7 +4,7 @@ import Kayak from './hallPlans/Kayak';
 import Edly from './hallPlans/Edly';
 import McKinsey from './hallPlans/McKinsey';
 import Typography from '@mui/material/Typography';
-import { useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {hallDataContext} from '../contexts/hallDataContext';
 import { selectedHallContext } from '../contexts/selectedHallContext';
 

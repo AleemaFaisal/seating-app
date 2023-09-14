@@ -12,7 +12,7 @@ mongoose.connect('mongodb+srv://aleemaf28:6ZaAp2KvgA6YSKH@basiccluster.1l0jkqo.m
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const cors = require('cors');
-app.use(cors());
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 

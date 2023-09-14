@@ -26,7 +26,7 @@ function NavList({setSelectedHall})
             <>
             <ListItem key={text} disablePadding>
                 <ListItemButton onClick={() => setSelectedHall(text)}>
-                <ListItemText primary={text} />
+                    <ListItemText primary={text} />
                 </ListItemButton>
             </ListItem>
             <Divider />

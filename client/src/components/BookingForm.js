@@ -77,9 +77,9 @@ function BookingForm({seatNum, setOpen})
                 'Content-Type': 'application/json'
               },
         });
-        console.log("res: ", res);
+        const status = res.status;
         res.text()
-        .then(msg => setResponse({msg: msg, status: res.status}));   
+        .then(msg => setResponse({msg, status}));   
     }
 
         const handleCloseResponse = () =>
@@ -125,7 +125,7 @@ function BookingForm({seatNum, setOpen})
         else{
             return (
                 <div>
-                    <h1>{response}</h1>
+                    <h1>{response.msg}</h1>
                     <Button variant="contained" onClick={handleCloseResponse}>OK</Button>
                 </div>
             )
