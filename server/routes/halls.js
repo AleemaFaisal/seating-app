@@ -17,8 +17,10 @@ router.get('/', async (req, res) => { //2d array: each row for one hall, each it
     while (checkDate.getTime() <= endDate.getTime())
     {
         let checkDateString = checkDate.toDateString();
-        let hallsData = await Hall.find({}, "hallName totalSeats numSeatsAvailable", {checkDateString: checkDateString} ).exec();
-        dateWiseData.push(hallsData);
+        let hallDocs = await Hall.find({}, "hallName totalSeats numSeatsAvailable seats", {checkDateString: checkDateString} ).exec();
+        console.log("halldocs: ", hallDocs);
+        hallDocs.forEach(doc => doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString));
+        dateWiseData.push(hallDocs);
         checkDate.setDate(checkDate.getDate() + 1);
     }
 
@@ -37,7 +39,11 @@ router.get('/', async (req, res) => { //2d array: each row for one hall, each it
 router.get('/:hallName', async (req,res) => {
     const checkDateString = decodeURI(req.query.checkDateString);
     const hallName = req.params.hallName;
-    const doc = await Hall.find({hallName}, "-_id", {checkDateString}).exec();
+    const doc = await Hall.findOne({hallName}, "-_id", {checkDateString}).exec();
+    console.log("doc: ", doc);
+    doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString);
+    doc.seats.forEach((seat, seatNum) => {doc.seats[seatNum].occupant = doc.getOccupant(seatNum, checkDateString)});
+
     
     if (!doc)
     {

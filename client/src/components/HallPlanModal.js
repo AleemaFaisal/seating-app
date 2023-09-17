@@ -11,15 +11,15 @@ import { Stack } from '@mui/material';
 import { useContext, useState, useEffect } from "react";
 import {BookingModalContext} from "../contexts/BookingModalContext";
 import { BASEURL } from "../constants";
+import {UserContext} from "../contexts/UserContext";
 
 function HallPlanModal({hallSelection, setHallSelection})
 {
-    console.log("reached hallplanmodal");
+    const user = useContext(UserContext);
+
     const [hallData, setHallData] = useState(null);
     const [activeSeat, setActiveSeat] = useState(null);
     const [response, setResponse] = useState(null);
-
-    console.log("hallselection: ", hallSelection);
 
     const getHallPlan = () => {
         switch(hallSelection.hallName){
@@ -49,7 +49,7 @@ function HallPlanModal({hallSelection, setHallSelection})
         await fetch(url, {
           method: "post",
           body: JSON.stringify({
-            userEmail: "aleema.faisal@arbisoft.com",
+            userEmail: user.email,
             startDateString: hallSelection.date,
             option
           }),
@@ -57,8 +57,10 @@ function HallPlanModal({hallSelection, setHallSelection})
             'Content-Type': 'application/json'
           }
         })
-        .then(res => {
-          setResponse(res);
+        .then(res => res.text())
+        .then(msg => {
+          console.log("response: ", msg);
+          setResponse(msg);
           setHallSelection(null);
         });
       };
@@ -74,7 +76,7 @@ function HallPlanModal({hallSelection, setHallSelection})
           .then(data => { 
             if (!ignore){
               console.log("halldata in modal: ", data);
-              setHallData(data[0])
+              setHallData(data)
             }})
           .catch(err => console.log(err));
         }
@@ -83,19 +85,21 @@ function HallPlanModal({hallSelection, setHallSelection})
        
         return () => {ignore=true; setHallData(null);};
   
-      }, [hallSelection])
+      }, [hallSelection]);
+
+      const containedStyle = "MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root";
+      const outlinedStyle = "MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium css-1rwt2y5-MuiButtonBase-root-MuiButton-root";
 
       if (hallData)
       {
         return (
-          <>
-            <Modal
+          <Modal
             open
             onClose={() => setHallSelection(null)}
             aria-labelledby="booking-hall-plan"
             aria-describedby="booking-hall-plan"
             classes="form-modal"
-        >
+          >
           <div>
             <Box sx={popUpStyle}>
                 <BookingModalContext.Provider value={{ "seatsData": hallData.seats, activeSeat, setActiveSeat}}>
@@ -103,26 +107,13 @@ function HallPlanModal({hallSelection, setHallSelection})
                 </BookingModalContext.Provider>
                 {activeSeat &&
                 <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
-                    <Button variant="outlined" onClick={() => sendBooking("month")} >Entire Month</Button>
-                    <Button variant="outlined" onClick={() => sendBooking("week")}  >Entire Week</Button>
-                    <Button variant="contained" onClick={() => sendBooking("day")} >Today</Button>
+                    <button className={outlinedStyle} onClick={() => sendBooking("month")} style={{textTransform: "none"}} >Entire Month</button>
+                    <button className={outlinedStyle} onClick={() => sendBooking("week")} style={{textTransform: "none"}}  >Entire Week</button>
+                    <button className={containedStyle} onClick={() => sendBooking("day")} style={{textTransform: "none"}} >Today</button>
                 </Stack> }
             </Box>
-            </div>
+          </div>
         </Modal>
-        <Modal
-            open={response}
-            aria-labelledby="booking-status"
-            aria-describedby="booking-status"
-            classes="form-modal"
-        >
-            <Box sx={popUpStyle}>
-              <h1>{response}</h1>
-              <Button variant="contained" onClick={() => setResponse(null)}>OK</Button>
-            </Box>
-        </Modal>
-        </>
-        
         );       
       }
       else

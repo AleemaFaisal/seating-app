@@ -6,6 +6,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Stack, setRef } from '@mui/material';
 import { BookingModalContext } from '../contexts/BookingModalContext';
+import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
+import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
+import IconButton from '@mui/material/IconButton';
 
 
 function Seat({seatNum, data}){
@@ -14,8 +17,8 @@ function Seat({seatNum, data}){
 
     console.log("data for seat ", seatNum, ": " ,data);
     const occupant = data.occupant;
-    let seatStyle = "seat rounded-md";
-    seatStyle += !occupant ? " border-solid border-teal-300 bg-transparent border-2 hover:bg-teal-100 active:bg-teal-700" :  " bg-teal-300";
+    let seatStyle = "seat";
+    //seatStyle += !occupant ? " border-solid border-teal-300 bg-transparent border-2 hover:bg-teal-100 active:bg-teal-700" :  " bg-teal-300";
 
     const popUpStyle = {
         position: 'absolute',
@@ -33,7 +36,10 @@ function Seat({seatNum, data}){
     {
         return (
         <>
-            <Button onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >{data.seatNum}</Button>
+            <Button onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >
+                {(activeSeat == seatNum) ? <TableRestaurantIcon color="success" /> : <TableRestaurantOutlinedIcon color="primary" /> }
+                <p className='seat-num'>{data.seatNum}</p>
+            </Button>
         </>
         )
     }
@@ -41,7 +47,10 @@ function Seat({seatNum, data}){
     {
         return (
             <Tooltip title={occupant}>
-                <Button className={seatStyle} disabled >{data.seatNum}</Button>
+                <Button className={seatStyle} disabled >
+                    <TableRestaurantIcon color="primary" />
+                    <p className='seat-num'>{data.seatNum}</p>
+                </Button>
             </Tooltip>
         )        
     }

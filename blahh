@@ -84,3 +84,27 @@
         },
       }); 
       };
+
+      {response && <Modal
+        open
+        onClose={() => console.log("closing modal")}
+        aria-labelledby="booking-status"
+        aria-describedby="booking-status"
+        classes="form-modal"
+    >
+        <Box sx={popUpStyle}>
+          <h1>{response}</h1>
+          <Button variant="contained" onClick={() => setResponse(null)}>OK</Button>
+        </Box>
+    </Modal>}
+
+
+// HallSchema.pre("find", async function (next, options) {
+//     const checkDateString = this.options.checkDateString;
+//     const docs = await this.model.findOne(this.getQuery());
+//     console.log("docs: ", docs);
+//     docs.forEach(doc => doc.seats.forEach((seat, seatNum) => {doc.seats[seatNum].occupant = doc.getOccupant(seatNum, checkDateString)}));
+//     docs.forEach(doc => doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString));
+//     await doc.save();
+//     next();
+// })

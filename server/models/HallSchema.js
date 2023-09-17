@@ -53,14 +53,6 @@ HallSchema.methods.getOccupant = function (seatNum, checkDateString) {
     return occupant;
 };
 
-HallSchema.pre("find", async function (next, options) {
-    const checkDateString = this.options.checkDateString;
-    const doc = await this.model.findOne(this.getQuery());
-    doc.seats.forEach((seat, seatNum) => {doc.seats[seatNum].occupant = doc.getOccupant(seatNum, checkDateString)});
-    doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString);
-    await doc.save();
-    next();
-})
 
 const Hall = mongoose.model('Hall', HallSchema);
 module.exports = Hall;

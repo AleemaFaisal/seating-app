@@ -25,11 +25,12 @@ function Login({setUser})
         {
           await axios.post(url, {appToken}, {headers: headers})
           .then( userData => {
+            console.log("userdata from login request: ", userData);
             if (!ignore){
                 console.log( "username: ", userData.data.name);
                 localStorage.setItem("appJWT", userData.data.appToken);
                 localStorage.setItem("googleToken", userData.data.googleToken);
-                setUser(userData.data.name);
+                setUser(userData.data);
                 navigate('/home');
             }
           })

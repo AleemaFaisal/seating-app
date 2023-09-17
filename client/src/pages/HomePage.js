@@ -1,12 +1,18 @@
 import HeaderBar from "../components/HeaderBar";
 import BookingTable from "../components/BookingTable";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserContext";
 
-function HomePage()
+function HomePage({user})
 {
+    console.log("user at home: ", user);
+
     return (
         <div className="home-page">
-            <HeaderBar />
-            <BookingTable />
+            <UserContext.Provider value={user}>
+               <HeaderBar />
+                <BookingTable /> 
+            </UserContext.Provider>
         </div>
     )
 
