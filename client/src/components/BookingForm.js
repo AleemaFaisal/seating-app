@@ -10,6 +10,7 @@ import { Toolbar, Typography } from '@mui/material';
 import { userContext } from '../contexts/userContext';
 import { selectedHallContext } from '../contexts/selectedHallContext';
 import { hallDataContext } from '../contexts/hallDataContext';
+import { BookingModalContext } from '../contexts/BookingModalContext';
 
 
 function BookingForm({seatNum, setOpen})
@@ -19,13 +20,8 @@ function BookingForm({seatNum, setOpen})
     const [dayError, setDayError] = useState(null);
     const [monthError, setMonthError] = useState(null);
     const [response, setResponse] = useState(null);
-    const user = useContext(userContext);
-    const {setHallData} = useContext(hallDataContext);
 
-
-    const hallName = useContext(selectedHallContext);
-    console.log(user);
-    
+    const {hallName} = useContext(BookingModalContext);    
 
     const handleDayClick = (i, checked) => {
         if (checked)

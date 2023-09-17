@@ -1,0 +1,86 @@
+        <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            classes="form-modal"
+        >
+            <Box sx={popUpStyle}>
+                <BookingForm seatNum={seatNum} hallName='Kayak' setOpen={setOpen} />
+            </Box>
+        </Modal>
+
+
+
+
+    let bookingClash;
+    seat.bookings.forEach( booking => {
+        const dayMatch = booking.days.includes(100) || days.some( day => booking.days.includes(day));
+        const monthMatch = booking.months.includes(100) || months.some( month => booking.months.includes(month));  
+        if (dayMatch && monthMatch) {bookingClash=true;}
+    })
+
+      
+    if (bookingClash)
+    {
+        res.status(400).send('Error - Clash with another booking. Choose different slots.');
+    }
+    else
+    {
+        const newBooking = {
+            username: username,
+            days: days,
+            months: months
+        };
+
+        hall.seats[seatNum -1].bookings.push(newBooking);
+        hall.seats[seatNum-1].available = hall.checkSeatAvailable(seatNum);
+
+        await hall.save()
+        .then(res.status(200).send("booking saved."))
+        .catch((err) => res.status(500).send(err));        
+    }
+
+
+
+    const todayRequest = async () => {
+        const url = "http://localhost:5000/" + selectedHall + "/" + activeSeat;
+        await fetch(url, {
+          method: "post",
+          body: JSON.stringify({
+          username: "Aleema Faisal",
+          byDate: true
+      }),
+      headers: {
+          'Content-Type': 'application/json'
+        },
+      }); 
+      };
+
+      const monthRequest = async () => {
+        const url = "http://localhost:5000/" + selectedHall + "/" + activeSeat;
+        await fetch(url, {
+          method: "post",
+          body: JSON.stringify({
+          username: "Aleema Faisal",
+          byMonth: true
+      }),
+      headers: {
+          'Content-Type': 'application/json'
+        },
+      }); 
+      };
+
+      const weekRequest = async () => {
+        const url = "http://localhost:5000/" + selectedHall + "/" + activeSeat;
+        await fetch(url, {
+          method: "post",
+          body: JSON.stringify({
+          username: "Aleema Faisal",
+          byWeek: true
+      }),
+      headers: {
+          'Content-Type': 'application/json'
+        },
+      }); 
+      };

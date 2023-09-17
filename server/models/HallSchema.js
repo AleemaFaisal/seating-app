@@ -2,34 +2,31 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const HallSchema = new Schema({
-    name: {
+    hallName: {
         type: String, 
         unique: true
     },
     totalSeats: Number,
-    numSeatsAvailable: {
-        type: Number,
-        default: 0
-    },
+    numSeatsAvailable: Number,
     seats: [{
         seatNum: Number,
         bookings: [{
-            username: String, 
-            days: [Number], 
-            months: [Number]
+            username: String,
+            startDate: String,
+            endDate: String
         }],
-        available: {
-            type: Boolean, 
-            default: true
+        occupant: {
+            type: String, 
+            default: ""
         }
     }]
 });
 
-HallSchema.methods.getNumSeatsAvailable = function () {
+HallSchema.methods.getNumSeatsAvailable = function (checkDateString) {
     let numAvailable =0;
     for (let i=0; i<this.seats.length; i++ )
     {
-        if (this.checkSeatAvailable(i))
+        if (!this.getOccupant(i, checkDateString))
         {
             numAvailable++;
         }
@@ -37,20 +34,33 @@ HallSchema.methods.getNumSeatsAvailable = function () {
     return numAvailable;
 };
 
-HallSchema.methods.checkSeatAvailable = function (seatNum) {
+HallSchema.methods.getOccupant = function (seatNum, checkDateString) {
+    let checkDate = new Date(checkDateString);
+    checkDate = checkDate.getTime();
     const bookings = this.seats[seatNum].bookings;
-    if (bookings.length > 0)
+    let occupant = "";
+    for (let booking of bookings)
     {
-        const today = new Date();
-        const dayFound = bookings.some(booking => booking.days.includes(today.getDay()) || booking.days.includes(100));
-        const monthFound = bookings.some(booking => booking.months.includes(today.getMonth()) || booking.months.includes(100));
-        return !(dayFound && monthFound);  
+        let startDate = new Date(booking.startDate);
+        startDate = startDate.getTime();
+        let endDate  = new Date(booking.endDate);
+        endDate = endDate.getTime();
+        if (checkDate >= startDate && checkDate <= endDate)
+        {
+            occupant = booking.username;
+        }
     }
-    else
-    {
-        return true;
-    }
+    return occupant;
 };
+
+HallSchema.pre("find", async function (next, options) {
+    const checkDateString = this.options.checkDateString;
+    const doc = await this.model.findOne(this.getQuery());
+    doc.seats.forEach((seat, seatNum) => {doc.seats[seatNum].occupant = doc.getOccupant(seatNum, checkDateString)});
+    doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString);
+    await doc.save();
+    next();
+})
 
 const Hall = mongoose.model('Hall', HallSchema);
 module.exports = Hall;

@@ -12,17 +12,18 @@ mongoose.connect('mongodb+srv://aleemaf28:6ZaAp2KvgA6YSKH@basiccluster.1l0jkqo.m
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const cors = require('cors');
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(cors());
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const loginRoute = require('./routes/login');
 const HallRoute = require('./routes/halls');
 const teamRoute = require('./routes/team');
+const userRoute = require('./routes/user');
 app.use('/login', loginRoute);
 app.use('/halls', HallRoute);
 app.use('/team', teamRoute);
-
+app.use('/user', userRoute);
 
 
 

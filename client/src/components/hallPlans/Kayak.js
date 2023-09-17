@@ -2,6 +2,7 @@ import HallRow from '../HallRow';
 
 function Kayak()
 {
+    console.log("reached kayak");
     return (
         <div className='hall'>
             <HallRow totalSeats={10} startSeatNum={1} />

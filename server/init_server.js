@@ -8,7 +8,7 @@ const Hall = require('./models/HallSchema');
 //INITIALIZE HALLS
 function initHall(hname, hseats)
 {
-    const name = hname;
+    const hallName = hname;
     const totalSeats = hseats;
     const numSeatsAvailable = hseats;
     const seats = [];
@@ -20,7 +20,7 @@ function initHall(hname, hseats)
         }
         seats.push(nextSeat);
     }
-    const nextHall = new Hall({name, totalSeats, numSeatsAvailable, seats});
+    const nextHall = new Hall({hallName, totalSeats, numSeatsAvailable, seats});
     nextHall.save()
     .then(console.log("Hall Saved"))
     .catch((err) => console.log(err));

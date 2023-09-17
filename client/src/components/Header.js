@@ -24,7 +24,7 @@ function Header({handleDrawerToggle})
     return (
         <AppBar
         position="absolute"
-        sx={{ zIndex: 1400}}
+        sx={{ zIndex: 1400, backgroundColor: '#257CA3' }}
         >
         <Toolbar>
         <IconButton

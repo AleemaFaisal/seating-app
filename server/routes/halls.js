@@ -2,88 +2,99 @@ const express = require('express');
 const router = express.Router();
 
 const Hall = require('../models/HallSchema');
+const User = require('../models/UserSchema');
 
-router.get('/', async (req, res) => {
-    const hallsData = await Hall.find({}, "name -_id").exec()
-    .catch((err) => res.status(500).send(err));
+router.get('/', async (req, res) => { //2d array: each row for one hall, each item in the row for data on that date
+    const startDateString = decodeURI(req.query.startDate);
+    const endDateString = decodeURI(req.query.endDate);
+    console.log("start date: ", startDateString);
+    console.log("enddate: ", endDateString);
 
-    if (!hallsData)
+    let checkDate = new Date(startDateString);
+    const endDate = new Date(endDateString);
+    let dateWiseData = [];
+
+    while (checkDate.getTime() <= endDate.getTime())
     {
-        res.status(400).send('no data found');
+        let checkDateString = checkDate.toDateString();
+        let hallsData = await Hall.find({}, "hallName totalSeats numSeatsAvailable", {checkDateString: checkDateString} ).exec();
+        dateWiseData.push(hallsData);
+        checkDate.setDate(checkDate.getDate() + 1);
     }
 
-    const hallNames = [];
-    for (item in hallsData)
+    const hallWiseData = [];
+    for (let hallNum=0; hallNum < dateWiseData[0].length; hallNum++) //for each hall
     {
-        hallNames.push(hallsData[item].name);
+        hallWiseData.push([]);
+        for (let dateNum =0; dateNum < dateWiseData.length; dateNum++)
+        {
+            hallWiseData[hallNum].push(dateWiseData[dateNum][hallNum]);
+        }
     }
-    res.status(200).send({"halls": hallNames});
+    res.status(200).send(hallWiseData);
 });
 
 router.get('/:hallName', async (req,res) => {
-    const name = req.params.hallName;
-    const doc = await Hall.findOne({name}).exec()
-    .catch((err) => res.status(500).send(err));
-
+    const checkDateString = decodeURI(req.query.checkDateString);
+    const hallName = req.params.hallName;
+    const doc = await Hall.find({hallName}, "-_id", {checkDateString}).exec();
+    
     if (!doc)
     {
         res.status(400).send('no hall found with required name');
     }
     else
-    {
-        doc.seats.forEach((seat, seatNum) => {doc.seats[seatNum].available = doc.checkSeatAvailable(seatNum)});
-        doc.numSeatsAvailable = doc.getNumSeatsAvailable();
-        
-        await doc.save()
-        .then(res.status(200).send(doc))
-        .catch(err => console.log(err));        
+    {        
+      res.status(200).send(doc);
     }
 })
 
 router.post('/:hallName/:seatNum', async (req,res) => {
-    const {username, days, months} = req.body;
+    const {userEmail, startDateString, option} = req.body;
     const {hallName, seatNum} = req.params;
 
-    const hall = await Hall.findOne({name: hallName}).exec()
-    .catch((err) => res.status(500).send(err));
+    const hall = await Hall.findOne({hallName}).exec();
+    const user = await User.findOne({email: userEmail}).exec()
 
-    const seat = hall.seats[seatNum-1];
-    let bookingClash;
-    seat.bookings.forEach( booking => {
-        const dayMatch = booking.days.includes(100) || days.some( day => booking.days.includes(day));
-        const monthMatch = booking.months.includes(100) || months.some( month => booking.months.includes(month));  
-        if (dayMatch && monthMatch) {bookingClash=true;}
-    })
-
-    if (bookingClash)
-    {
-        res.status(400).send('Error - Clash with another booking. Choose different slots.');
+    if (!hall){
+        res.status(400).send("error - hall not found");
     }
-    else
-    {
-        const newBooking = {
-            username: username,
-            days: days,
-            months: months
-        };
-
-        hall.seats[seatNum -1].bookings.push(newBooking);
-        hall.seats[seatNum-1].available = hall.checkSeatAvailable(seatNum);
-
-        await hall.save()
-        .then(res.status(200).send("booking saved."))
-        .catch((err) => res.status(500).send(err));        
+    else if (!user){
+        res.status(400).send("error- user not found");
     }
-})
 
+    const startDate = new Date(startDateString);
+    let endDate;
+    switch(option)
+    {
+        case "day": endDate = new Date(startDateString); break;
+        case "week": endDate = new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate() + (5-startDate.getDay())); break;
+        case "month": endDate = new Date(startDate.getFullYear(), startDate.getMonth()+1, 0); break;
+    }
+    const endDateString = endDate.toDateString();
 
-//testing schema methods
-router.get('/numseats/:hallname', async (req,res) => {
-    const {hallname} = req.params;
-    const hall = await Hall.findOne({name: hallname}).exec();
-    console.log(hall.getNumSeatsAvailable());
-    const num = hall.getNumSeatsAvailable();
-    res.status(200).send({"num": num});
+    let booking = {
+        username: user.name,
+        startDate: startDateString,
+        endDate: endDateString
+    }
+
+    hall.seats[seatNum-1].bookings.push(booking);
+    await hall.save()
+    .catch(err => res.status(500).send(err));
+
+    booking = {
+        hallName,
+        seatNum,
+        startDate: startDateString,
+        endDate: endDateString
+    };
+
+    user.bookings.push(booking);
+    await user.save()
+    .catch(err => res.status(500).send(err));
+
+    res.status(200).send("booking saved");
 })
 
 module.exports = router;

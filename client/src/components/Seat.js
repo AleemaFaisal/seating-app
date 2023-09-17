@@ -4,19 +4,18 @@ import Modal from '@mui/material/Modal';
 import { useContext, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import BookingForm from './BookingForm';
+import { Stack, setRef } from '@mui/material';
+import { BookingModalContext } from '../contexts/BookingModalContext';
 
 
-function Seat({seatNum, data})
-{
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    
+function Seat({seatNum, data}){
+    const {activeSeat, setActiveSeat} = useContext(BookingModalContext);
+    //active to define the icon
+
     console.log("data for seat ", seatNum, ": " ,data);
-    const available = data.available;
+    const occupant = data.occupant;
     let seatStyle = "seat rounded-md";
-    seatStyle += available ? " border-solid border-teal-300 bg-transparent border-2 hover:bg-teal-100 active:bg-teal-700" :  " bg-teal-300";
+    seatStyle += !occupant ? " border-solid border-teal-300 bg-transparent border-2 hover:bg-teal-100 active:bg-teal-700" :  " bg-teal-300";
 
     const popUpStyle = {
         position: 'absolute',
@@ -30,34 +29,22 @@ function Seat({seatNum, data})
         p: 4,
       };
 
-    if (available)
+    if (!occupant)
     {
         return (
         <>
-        <Button onClick={handleOpen} className={seatStyle} disabled={!available} >{data.seatNum}</Button>
-        <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-            classes="form-modal"
-        >
-            <Box sx={popUpStyle}>
-                <BookingForm seatNum={seatNum} hallName='Kayak' setOpen={setOpen} />
-            </Box>
-        </Modal>
+            <Button onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >{data.seatNum}</Button>
         </>
         )
     }
     else
     {
         return (
-            <Tooltip title={data.bookings[0].username}>
-                <Button className={seatStyle} disabled={!available}>{data.seatNum}</Button>
+            <Tooltip title={occupant}>
+                <Button className={seatStyle} disabled >{data.seatNum}</Button>
             </Tooltip>
         )        
     }
-
 }
 
 export default Seat;
