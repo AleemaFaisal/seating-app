@@ -30,6 +30,7 @@ function HallPlanModal({hallSelection, setHallSelection,})
           case "Test1": return <Test1 disableBooking={disableBooking} />; break;
           case "Test2": return <Test2 disableBooking={disableBooking} />; break;
           case "Test3": return <Test3 disableBooking={disableBooking} />; break;
+          default: return <Test1 disableBooking={disableBooking} />; break;
         }
       };
 
@@ -40,9 +41,8 @@ function HallPlanModal({hallSelection, setHallSelection,})
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 400,
+        width: "70rem",
         bgcolor: 'background.paper',
-        border: '2px solid #000',
         boxShadow: 24,
         p: 4,
       };
@@ -112,8 +112,7 @@ function HallPlanModal({hallSelection, setHallSelection,})
       }, [hallSelection]);
 
       const containedStyle = "MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root";
-      const outlinedStyle = "MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium css-1rwt2y5-MuiButtonBase-root-MuiButton-root";
-
+      const outlinedStyle = "no-wrap MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium css-1rwt2y5-MuiButtonBase-root-MuiButton-root";
       if (hallData)
       {
         return (
@@ -125,12 +124,16 @@ function HallPlanModal({hallSelection, setHallSelection,})
             classes="form-modal"
           >
           <div>
-            <Box sx={popUpStyle}>
+            <Box sx={popUpStyle} className="booking-modal" >
+                <h1 className="highlight">{hallSelection.hallName}</h1>
+                <p className="small">{hallSelection.date}</p>
                 <BookingModalContext.Provider value={{ "seatsData": hallData.seats, activeSeat, setActiveSeat}}>
                 {HallPlan}  
                 </BookingModalContext.Provider>
+                <p className="small">Click To Choose Your Seat</p>
                 {activeSeat &&
                 <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
+                    <p className="small no-wrap">Book For</p>
                     <button className={outlinedStyle} onClick={() => sendBooking("month")} style={{textTransform: "none"}} >Entire Month</button>
                     <button className={outlinedStyle} onClick={() => sendBooking("week")} style={{textTransform: "none"}}  >Entire Week</button>
                     <button className={containedStyle} onClick={() => sendBooking("day")} style={{textTransform: "none"}} >Today</button>

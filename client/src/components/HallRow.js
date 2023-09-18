@@ -2,10 +2,9 @@ import Seat from './Seat';
 import { useContext } from 'react';
 import { BookingModalContext } from '../contexts/BookingModalContext';
 
-function HallRow({totalSeats, startSeatNum})
+function HallRow({totalSeats, startSeatNum, vertical})
 {
     const {seatsData} = useContext(BookingModalContext);
-    //console.log("seatsdata in halrow: ", seatsData);
 
     const seats = [];
     const seatsPerRow = totalSeats/2;
@@ -13,18 +12,17 @@ function HallRow({totalSeats, startSeatNum})
     {
         seats.push(i);
     }
-    console.log("seats: ", seats);
 
     return (
-        <div className='row'>
-            <div>
+        <div className={vertical ? "vertical-section row" : "row"}>
+            <div className={vertical ? "vertical-row v1" : ""}>
                 {seats.map( (index) =>
-                    <Seat seatNum={index} key={index} data={seatsData[index-1]} />
+                    <Seat seatNum={index} key={index} data={seatsData[index-1]} upper={true} />
                 )}
             </div>
-            <div>
+            <div className={vertical ? "vertical-row" : ""}>
                 {seats.map( index =>
-                    <Seat seatNum={index + seatsPerRow}  key={index + seatsPerRow} data={seatsData[index+seatsPerRow-1]}/>
+                    <Seat seatNum={index + seatsPerRow}  key={index + seatsPerRow} data={seatsData[index+seatsPerRow-1]} upper={false} />
                 )}
             </div>
         </div>

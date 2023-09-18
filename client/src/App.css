@@ -6,6 +6,27 @@
 .body
 {
   font-family: 'Montserrat', sans-serif;
+  color: rgb(71, 70, 70);
+}
+
+.small
+{
+  font-size: 0.8rem;
+  color: gray
+}
+
+.titles
+{
+  font-size: 1rem;
+  font-weight: bold;
+  display: block;
+}
+
+.highlight
+{
+  display: block;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .login-page
@@ -48,10 +69,11 @@
   width: 90%;
   height: 85vh;
   position:relative;
-  top: 2rem;
-  margin: 0 auto;
-  overflow-y: auto;
+  margin: 2px auto;
   padding: 20px 5px;
+  display: flex;
+  flex-direction: column;
+  top:1rem;
 }
 
 .navigation
@@ -59,7 +81,10 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: 10px auto;
+  margin: 0 auto;
+  background-color: white;
+  width: 100%;
+  padding: 10px;
 }
 
 .buttons
@@ -69,9 +94,21 @@
   gap: 10px;
 }
 
+.no-wrap
+{
+  white-space: nowrap;
+}
+
+.booking-modal
+{
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
 .booking-table
 {
-  padding: 10px;
+  padding: 0;
   overflow-y: auto;
 }
 
@@ -91,22 +128,43 @@
   background-color: #d1edfca7;
 }
 
-.highlight
-{
-  display: block;
-  font-weight: bold;
-}
-
 .row
 {
   margin: 25px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-wrap: nowrap;
 }
+
+.single-row
+{
+  display: flex;
+  flex: row;
+  margin: 48px auto;
+}
+
+.upper
+{
+  display: flex;
+  flex-direction: column-reverse !important; 
+}
+
+.vertical-section 
+{
+  rotate: 90deg;
+  margin-right: 80px;
+}
+
 
 .seat
 {
-  margin: 5px;
-  padding: 5px;
+  display: flex;
+  flex-direction: column;
   width: 40px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .seat-num
@@ -165,4 +223,29 @@
 .input-error
 {
   color: red;
+}
+
+/*hall plans */
+.kayak
+{
+  display: flex;
+  flex-direction: row;
+}
+
+.k
+{  
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0 7px;
+}
+
+.k2
+{
+  margin-right: 8px;
+}
+
+.k5
+{
+  padding-top: 30px;
 }

@@ -41,26 +41,26 @@ router.post('/', async (req,res) => {
         console.log("decodedToken: ", decodedToken);
 
         //check if user already exists - update tokens and return
-        const returningUser = await User.findOne({email: decodedToken.email}).exec();
+        const returningUser = await User.findOne({email: decodedToken.email}).exec()
+        .catch(err => console.log(err));
         if (returningUser)
         {
-            returningUser.googleToken = googleToken;
-            returningUser.appToken = appToken;
-            await returningUser.save()
-            .then( updatedUser => res.status(200).send(updatedUser));
+            res.status(200).send(returningUser);
         }
-        
-        //if new, save the user to db with tokens
-        const newUser = new User({
-            name: decodedToken.name,
-            email: decodedToken.email,
-            appToken: appToken,
-            googleToken: googleToken,
-            bookings: []
-        });
+        else
+        {
+            //if new, save the user to db with tokens
+            const newUser = new User({
+                name: decodedToken.name,
+                email: decodedToken.email,
+                appToken: appToken,
+                googleToken: googleToken,
+                bookings: []
+            });
 
-        await newUser.save()
-        .then( savedUser => res.status(200).send(savedUser));
+            await newUser.save()
+            .then( savedUser => res.status(200).send(savedUser));  
+        }
     }
     if (!googleToken && !appToken)
     {

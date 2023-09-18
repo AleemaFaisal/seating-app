@@ -26,9 +26,7 @@ function initHall(hname, hseats)
     .catch((err) => console.log(err));
 }
 
-initHall("Test1", 10);
-initHall("Test2", 20);
-initHall("Test3", 30);
+initHall("Kayak", 138);
 
 //INITIALIZE TEAMS
 //for (let n=1; n<=6; n++) 

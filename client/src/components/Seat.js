@@ -13,14 +13,14 @@ import { UserContext } from '../contexts/UserContext';
 import {HallDisableContext} from '../contexts/HallDisableContext';
 
 
-function Seat({seatNum, data}){
+function Seat({seatNum, data, upper}){
     const {activeSeat, setActiveSeat} = useContext(BookingModalContext);
     const user = useContext(UserContext);
     const disable = useContext(HallDisableContext);
 
     //console.log("data for seat ", seatNum, ": " ,data);
     const occupant = data.occupant;
-    let seatStyle = "seat";
+    let seatStyle = upper ? "upper seat" : "seat";
 
     const popUpStyle = {
         position: 'absolute',
@@ -37,12 +37,12 @@ function Seat({seatNum, data}){
     if (!occupant)
     {
         return (
-        <>
-            <Button disabled={disable} onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >
-                {(activeSeat == seatNum) ? <TableRestaurantIcon color="secondary" /> : <TableRestaurantOutlinedIcon color="primary" /> }
-                <p className='seat-num'>{data.seatNum}</p>
+            <Button disabled={disable} onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} >
+                <div className={seatStyle}>
+                    {(activeSeat == seatNum) ? <TableRestaurantIcon color="secondary" /> : <TableRestaurantOutlinedIcon color="primary" /> }
+                    <p className='seat-num'>{data.seatNum}</p>
+                </div>
             </Button>
-        </>
         )
     }
     else
