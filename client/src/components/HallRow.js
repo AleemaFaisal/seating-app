@@ -5,7 +5,7 @@ import { BookingModalContext } from '../contexts/BookingModalContext';
 function HallRow({totalSeats, startSeatNum})
 {
     const {seatsData} = useContext(BookingModalContext);
-    console.log("seatsdata in halrow: ", seatsData);
+    //console.log("seatsdata in halrow: ", seatsData);
 
     const seats = [];
     const seatsPerRow = totalSeats/2;

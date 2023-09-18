@@ -12,21 +12,24 @@ import { useContext, useState, useEffect } from "react";
 import {BookingModalContext} from "../contexts/BookingModalContext";
 import { BASEURL } from "../constants";
 import {UserContext} from "../contexts/UserContext";
+import getUserSeat from "../utils/getUserSeat";
 
-function HallPlanModal({hallSelection, setHallSelection})
+function HallPlanModal({hallSelection, setHallSelection,})
 {
     const user = useContext(UserContext);
+    console.log("user: ", user);
 
     const [hallData, setHallData] = useState(null);
     const [activeSeat, setActiveSeat] = useState(null);
     const [response, setResponse] = useState(null);
+    const disableBooking = hallSelection.disableBooking;
 
     const getHallPlan = () => {
         switch(hallSelection.hallName){
-          case "Kayak": return <Kayak />; break;
-          case "Test1": return <Test1 />; break;
-          case "Test2": return <Test2 />; break;
-          case "Test3": return <Test3 />; break;
+          case "Kayak": return <Kayak disableBooking={disableBooking} />; break;
+          case "Test1": return <Test1 disableBooking={disableBooking} />; break;
+          case "Test2": return <Test2 disableBooking={disableBooking} />; break;
+          case "Test3": return <Test3 disableBooking={disableBooking} />; break;
         }
       };
 
@@ -45,13 +48,34 @@ function HallPlanModal({hallSelection, setHallSelection})
       };
 
       const sendBooking = async function (option) {
-        const url = BASEURL +  "/halls/" + hallSelection.hallName + "/" + activeSeat;
+        const url = BASEURL +  "/halls/" + hallSelection.hallName + "/" + activeSeat + "/book";
         await fetch(url, {
           method: "post",
           body: JSON.stringify({
             userEmail: user.email,
             startDateString: hallSelection.date,
             option
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(res => res.text())
+        .then(msg => {
+          console.log("response: ", msg);
+          setResponse(msg);
+          setHallSelection(null);
+        });
+      };
+
+      const cancelBooking = async function () {
+        const userSeat = getUserSeat(user, hallSelection.hallName, hallSelection.date);
+        console.log("seat found: ", userSeat);
+        const url = BASEURL +  "/halls/" + hallSelection.hallName + "/" + userSeat + "/cancel?cancelDate=" + hallSelection.date;
+        await fetch(url, {
+          method: "post",
+          body: JSON.stringify({
+            email: user.email,
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -111,6 +135,9 @@ function HallPlanModal({hallSelection, setHallSelection})
                     <button className={outlinedStyle} onClick={() => sendBooking("week")} style={{textTransform: "none"}}  >Entire Week</button>
                     <button className={containedStyle} onClick={() => sendBooking("day")} style={{textTransform: "none"}} >Today</button>
                 </Stack> }
+                {disableBooking && 
+                <button className={outlinedStyle} onClick={cancelBooking}>Cancel Booking</button>
+                }
             </Box>
           </div>
         </Modal>

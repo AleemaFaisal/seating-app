@@ -18,6 +18,11 @@ router.post('/', async (req,res) => {
     const {appToken} = req.body;
     if (appToken)
     {
+        const verified = jwt.verify(appToken, KEY);
+        if (!verified)
+        {
+            res.status(400).send("token not verified.");
+        }
         await User.findOne({appToken}).exec()
         .then(existingUser => res.status(200).send(existingUser))
         .catch(err => {console.log(err); res.status(500).send("server error")});
@@ -36,31 +41,31 @@ router.post('/', async (req,res) => {
         console.log("decodedToken: ", decodedToken);
 
         //check if user already exists - update tokens and return
-        const returningUser = await User.findOne({email: decodedToken.email}).exec()
-        .catch(err => res.status(500).send(err));
-
-        returningUser.googleToken = googleToken;
-        returningUser.appToken = appToken;
-        await returningUser.save({isNew: false})
-        .then( updatedUser => res.status(200).send(updatedUser))
-        .catch(err => res.status(500).send(err));
-
+        const returningUser = await User.findOne({email: decodedToken.email}).exec();
+        if (returningUser)
+        {
+            returningUser.googleToken = googleToken;
+            returningUser.appToken = appToken;
+            await returningUser.save()
+            .then( updatedUser => res.status(200).send(updatedUser));
+        }
+        
         //if new, save the user to db with tokens
         const newUser = new User({
             name: decodedToken.name,
             email: decodedToken.email,
             appToken: appToken,
-            googleToken: googleToken
+            googleToken: googleToken,
+            bookings: []
         });
 
         await newUser.save()
-        .then( savedUser => res.status(200).send(savedUser))
-        .catch(err => {console.log(err); res.status(500).send(err)});
+        .then( savedUser => res.status(200).send(savedUser));
     }
-    // else
-    // {
-    //     res.status(400).send("unauthorized request");
-    // }
+    if (!googleToken && !appToken)
+    {
+        res.status(400).send("invalid request");
+    }
 })
 
 

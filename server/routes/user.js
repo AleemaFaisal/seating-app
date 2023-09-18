@@ -17,7 +17,7 @@ router.get('/:email', async (req,res) => {
 
 router.get('/:email/week-bookings', async (req,res) => {
     const email = req.params.email;
-    const startDateString = req.query.startDate;
+    const startDateString = decodeURI(req.query.startDate);
 
     const user = await User.findOne({email}).exec();
 

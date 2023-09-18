@@ -18,12 +18,10 @@ router.get('/', async (req, res) => { //2d array: each row for one hall, each it
     {
         let checkDateString = checkDate.toDateString();
         let hallDocs = await Hall.find({}, "hallName totalSeats numSeatsAvailable seats", {checkDateString: checkDateString} ).exec();
-        console.log("halldocs: ", hallDocs);
         hallDocs.forEach(doc => doc.numSeatsAvailable = doc.getNumSeatsAvailable(checkDateString));
         dateWiseData.push(hallDocs);
         checkDate.setDate(checkDate.getDate() + 1);
     }
-
     const hallWiseData = [];
     for (let hallNum=0; hallNum < dateWiseData[0].length; hallNum++) //for each hall
     {
@@ -55,7 +53,7 @@ router.get('/:hallName', async (req,res) => {
     }
 })
 
-router.post('/:hallName/:seatNum', async (req,res) => {
+router.post('/:hallName/:seatNum/book', async (req,res) => {
     const {userEmail, startDateString, option} = req.body;
     const {hallName, seatNum} = req.params;
 
@@ -101,6 +99,101 @@ router.post('/:hallName/:seatNum', async (req,res) => {
     .catch(err => res.status(500).send(err));
 
     res.status(200).send("booking saved");
+})
+
+router.post('/:hallName/:seatNum/cancel', async (req,res) => {
+    const cancelDate = decodeURI(req.query.cancelDate);
+    const {hallName, seatNum} = req.params;
+    const userEmail = req.body.email;
+    const hall = await Hall.findOne({hallName}).exec();
+    const user = await User.findOne({email: userEmail}).exec();
+    let checkDate = new Date(cancelDate);
+    console.log("checkdate: ", checkDate.toDateString());
+    let bookingStart = new Date();
+    let bookingEnd = new Date();
+    console.log("hall bookings: ", hall.seats[seatNum-1].bookings);
+
+
+    function matchingBooking (booking) {
+        console.log("checking booking: ", booking);
+        bookingStart = new Date(booking.startDate);
+        bookingEnd = new Date(booking.endDate);
+        return (booking.username==user.name && (checkDate.getTime() >= bookingStart.getTime()) && (checkDate.getTime() <= bookingEnd.getTime()));
+    }
+
+    const bookingIndex = hall.seats[seatNum-1].bookings.findIndex(matchingBooking);
+    let hallBooking = hall.seats[seatNum-1].bookings[bookingIndex];
+    console.log("hallbooking: ", hallBooking);
+    let userBookingIndex = user.bookings.findIndex( (booking) => (booking.hallName == hallName && booking.seatNum == seatNum && booking.startDate==hallBooking.startDate));
+    let userBooking = user.bookings[userBookingIndex];
+
+    console.log("hallbooking: ", hallBooking);
+    console.log("userbooking: ", userBooking);
+
+    if (checkDate.getTime() === bookingStart.getTime() && bookingStart.getTime() === bookingEnd.getTime())
+    {
+        let updatedHallBookings = hall.seats[seatNum-1].bookings.filter( (booking, index) => index!==bookingIndex);
+        let updatedUserBookings = user.bookings.filter( (booking, index) => index!= userBookingIndex);
+        console.log("updateduserbookings: ", updatedUserBookings);
+        hall.seats[seatNum-1].bookings = updatedHallBookings;
+        user.bookings = updatedUserBookings;
+    }
+    else if (checkDate.getTime() === bookingStart.getTime())
+    {
+        bookingStart.setDate(bookingStart.getDate() + 1);
+        hallBooking.startDate =  bookingStart.toDateString();
+        hall.seats[seatNum-1].bookings[bookingIndex] = hallBooking;
+        user.bookings[userBookingIndex].startDate = bookingStart.toDateString();
+        console.log("hall booking: ", hallBooking);
+        console.log("user bookings: ", user.bookings);
+    }
+    else if (checkDate.getTime() === bookingEnd.getTime())
+    {
+        bookingEnd.setDate(bookingEnd.getDate() - 1);
+        hallBooking.endDate =  bookingEnd.toDateString();
+        hall.seats[seatNum-1].bookings[bookingIndex] = hallBooking;
+        user.bookings[bookingIndex].endDate = bookingEnd.toDateString();
+        console.log("hall booking: ", hallBooking);
+        console.log("user bookings: ", user.bookings);
+    }
+    else
+    {
+        let bookingOne = {
+            username: hallBooking.username,
+            startDate: hallBooking.startDate
+        }; 
+        let bookingTwo = {
+            username: hallBooking.username,
+            endDate: hallBooking.endDate
+        };
+        bookingEnd.setDate(checkDate.getDate() - 1);
+        bookingOne.endDate = bookingEnd.toDateString();
+        bookingStart.setDate(checkDate.getDate()+1);
+        bookingTwo.startDate = bookingStart.toDateString();
+        hall.seats[seatNum-1].bookings[bookingIndex] = bookingOne;
+        hall.seats[seatNum-1].bookings.push(bookingTwo);
+
+        bookingOne = {
+            hallName,
+            seatNum,
+            startDate: hallBooking.startDate,
+            endDate: bookingEnd.toDateString()
+        };
+
+        bookingTwo = {
+            hallName,
+            seatNum,
+            startDate: bookingStart.toDateString(),
+            endDate: hallBooking.endDate
+        };
+
+        user.bookings[userBookingIndex] = bookingOne;
+        user.bookings.push(bookingTwo);
+        console.log("userboookings: ", user.bookings);
+    }
+    await hall.save();
+    await user.save();
+    res.status(200).send("ok");
 })
 
 module.exports = router;

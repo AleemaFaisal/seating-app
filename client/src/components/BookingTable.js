@@ -6,7 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import BookingCell from "./BookingCell";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -19,6 +19,7 @@ import HallPlanModal from "./HallPlanModal";
 import { BASEURL } from "../constants";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import { UserContext } from "../contexts/UserContext";
 
 
 
@@ -27,10 +28,13 @@ function BookingTable()
     const [weekNum, setWeekNum] = useState(0);
     const [hallSelection, setHallSelection] = useState(null);
     const [hallsData, setHallsData] = useState(null);
+    const [userBookings, setUserBookings] = useState(null);
     const dates = useMemo(() => getDates(weekNum), [weekNum]);
+    const user = useContext(UserContext);
     const today = new Date();
     today.setHours(0,0,0,0);
 
+    
     useEffect(() => {
             let ignore = false;
             const url = BASEURL + "/halls" + "?startDate=" + dates[0] + "&endDate=" + dates[4];
@@ -38,7 +42,7 @@ function BookingTable()
                 await fetch(url)
                 .then(response => response.json())
                 .then(data => { 
-                    //console.log("data on frontend: ", data);
+                    console.log("data on frontend: ", data);
                     if (!ignore){
                         setHallsData(data);
                     }})
@@ -48,7 +52,26 @@ function BookingTable()
             getData();
 
             return () => {ignore=true;};      
-    }, [dates])
+    }, [dates]);
+
+    useEffect(() => {
+      let ignore = false;
+      const url = BASEURL + "/user" + "/" + user.email + "/week-bookings?startDate=" + dates[0];
+      async function getData () {
+          await fetch(url)
+          .then(response => response.json())
+          .then(data => { 
+            console.log("userdata: ", data);
+              if (!ignore){
+                  setUserBookings(data);
+              }})
+          .catch(err => console.log(err));
+      }
+
+      getData();
+
+      return () => {ignore=true;};      
+}, [dates]);
 
     return (
       <div className="booking-pane">
@@ -89,16 +112,19 @@ function BookingTable()
                   <p className="highlight">{hallData[0].hallName}</p>
                 </TableCell>
                 {hallData.map((dateEntry, dateNum) => {
-                  const disabled = today > new Date(dates[dateNum]);
+                  const datePassed = today > new Date(dates[dateNum]);
                   const seatsBooked = dateEntry.totalSeats - dateEntry.numSeatsAvailable;
                   const occupied = Number(seatsBooked/dateEntry.totalSeats)*100;
+                  const userBookedOnDate = userBookings.some(booking => booking.date == dates[dateNum]); //disable additional bookings for this day
+                  const userBookedOnSlot = userBookings.some(booking => booking.hall == dateEntry.hallName && booking.date == dates[dateNum]);
+                  const bgColor = userBookedOnSlot ? "green" : "silver";
                   return (
                     <TableCell align="center" className={(today.toDateString() == dates[dateNum]) ? "booking-cell today" : "booking-cell"}>
                     <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
-                      <IconButton disabled={disabled} onClick={() => setHallSelection({"hallName": dateEntry.hallName, "date": dates[dateNum]})} aria-label="book" color="white" sx={{ color: "white", backgroundColor: "silver", ':hover': {backgroundColor: '#257CA3'}}}>
-                        { disabled ? <NotInterestedOutlinedIcon /> : <TableRestaurantOutlinedIcon /> }
+                      <IconButton disabled={datePassed} onClick={() => setHallSelection({"hallName": dateEntry.hallName, "date": dates[dateNum], "disableBooking": userBookedOnSlot})} aria-label="book" color="white" sx={{ color: "white", backgroundColor: bgColor, ':hover': {backgroundColor: '#257CA3'}}}>
+                        { datePassed ? <NotInterestedOutlinedIcon /> : <TableRestaurantOutlinedIcon /> }
                       </IconButton>
-                      { !disabled && "Book Seat"}
+                      { (!datePassed) ? (userBookedOnDate) ? "View Details" : "Book Seat" : "" }
                       <LinearProgress variant="determinate" value={occupied} sx={{ width: "45%", marginRight: "4px", borderRadius: "5px" }} />
                       {seatsBooked}/{dateEntry.totalSeats}
                     </Stack>

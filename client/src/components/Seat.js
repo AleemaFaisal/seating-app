@@ -9,16 +9,18 @@ import { BookingModalContext } from '../contexts/BookingModalContext';
 import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
 import IconButton from '@mui/material/IconButton';
+import { UserContext } from '../contexts/UserContext';
+import {HallDisableContext} from '../contexts/HallDisableContext';
 
 
 function Seat({seatNum, data}){
     const {activeSeat, setActiveSeat} = useContext(BookingModalContext);
-    //active to define the icon
+    const user = useContext(UserContext);
+    const disable = useContext(HallDisableContext);
 
-    console.log("data for seat ", seatNum, ": " ,data);
+    //console.log("data for seat ", seatNum, ": " ,data);
     const occupant = data.occupant;
     let seatStyle = "seat";
-    //seatStyle += !occupant ? " border-solid border-teal-300 bg-transparent border-2 hover:bg-teal-100 active:bg-teal-700" :  " bg-teal-300";
 
     const popUpStyle = {
         position: 'absolute',
@@ -36,8 +38,8 @@ function Seat({seatNum, data}){
     {
         return (
         <>
-            <Button onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >
-                {(activeSeat == seatNum) ? <TableRestaurantIcon color="success" /> : <TableRestaurantOutlinedIcon color="primary" /> }
+            <Button disabled={disable} onClick={() => {setActiveSeat( (activeSeat==seatNum) ? null : seatNum)}} className={seatStyle} >
+                {(activeSeat == seatNum) ? <TableRestaurantIcon color="secondary" /> : <TableRestaurantOutlinedIcon color="primary" /> }
                 <p className='seat-num'>{data.seatNum}</p>
             </Button>
         </>
@@ -48,7 +50,7 @@ function Seat({seatNum, data}){
         return (
             <Tooltip title={occupant}>
                 <Button className={seatStyle} disabled >
-                    <TableRestaurantIcon color="primary" />
+                    <TableRestaurantIcon color={(occupant == user.name) ? "success" : "primary"} />
                     <p className='seat-num'>{data.seatNum}</p>
                 </Button>
             </Tooltip>

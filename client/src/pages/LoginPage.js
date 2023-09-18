@@ -44,7 +44,7 @@ function Login({setUser})
                 if (!ignore) {
                     console.log(user);
                     localStorage.setItem("appJWT", user.data.appToken);
-                    setUser(user.data.name);
+                    setUser(user.data);
                     navigate('/home');
                 }
             })
