@@ -2,7 +2,7 @@ import HallRow from '../HallRow';
 import {HallDisableContext} from "../../contexts/HallDisableContext";
 
 
-function Test1({disable: disableBooking})
+function Test1({disableBooking})
 {
     return (
         <div className='edly'>

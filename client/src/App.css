@@ -130,10 +130,10 @@
 
 .row
 {
-  margin: 25px auto;
+  margin: 1.5rem auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   flex-wrap: nowrap;
 }
 
@@ -141,7 +141,7 @@
 {
   display: flex;
   flex: row;
-  margin: 48px auto;
+  margin: 3rem auto;
 }
 
 .upper
@@ -153,7 +153,7 @@
 .vertical-section 
 {
   rotate: 90deg;
-  margin-right: 80px;
+  margin-top: 3.75rem;
 }
 
 
@@ -161,7 +161,7 @@
 {
   display: flex;
   flex-direction: column;
-  width: 40px;
+  width: 2.5rem;
   text-align: center;
   justify-content: center;
   align-items: center;
@@ -230,22 +230,19 @@
 {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  width: 58rem;
 }
 
 .k
 {  
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
   margin: 0 7px;
 }
 
 .k2
 {
   margin-right: 8px;
-}
-
-.k5
-{
-  padding-top: 30px;
 }

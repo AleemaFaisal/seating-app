@@ -6,7 +6,7 @@ import Test2 from "../components/hallPlans/Test2";
 import Test3 from "../components/hallPlans/Test3";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button } from '@mui/base/Button';
+import Button from '@mui/material/Button';
 import { Stack } from '@mui/material';
 import { useContext, useState, useEffect } from "react";
 import {BookingModalContext} from "../contexts/BookingModalContext";
@@ -14,7 +14,7 @@ import { BASEURL } from "../constants";
 import {UserContext} from "../contexts/UserContext";
 import getUserSeat from "../utils/getUserSeat";
 
-function HallPlanModal({hallSelection, setHallSelection,})
+function HallPlanModal({hallSelection, setHallSelection, setRefresh})
 {
     const user = useContext(UserContext);
     console.log("user: ", user);
@@ -23,6 +23,7 @@ function HallPlanModal({hallSelection, setHallSelection,})
     const [activeSeat, setActiveSeat] = useState(null);
     const [response, setResponse] = useState(null);
     const disableBooking = hallSelection.disableBooking;
+    console.log("hall selection: ", hallSelection);
 
     const getHallPlan = () => {
         switch(hallSelection.hallName){
@@ -36,12 +37,16 @@ function HallPlanModal({hallSelection, setHallSelection,})
 
     const HallPlan =  getHallPlan();  
 
+    const refresh = () => {
+      setHallSelection(null);
+      setRefresh(r => r+1);
+    }
+
     const popUpStyle = {
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: "70rem",
         bgcolor: 'background.paper',
         boxShadow: 24,
         p: 4,
@@ -64,7 +69,6 @@ function HallPlanModal({hallSelection, setHallSelection,})
         .then(msg => {
           console.log("response: ", msg);
           setResponse(msg);
-          setHallSelection(null);
         });
       };
 
@@ -83,9 +87,7 @@ function HallPlanModal({hallSelection, setHallSelection,})
         })
         .then(res => res.text())
         .then(msg => {
-          console.log("response: ", msg);
           setResponse(msg);
-          setHallSelection(null);
         });
       };
 
@@ -111,14 +113,29 @@ function HallPlanModal({hallSelection, setHallSelection,})
   
       }, [hallSelection]);
 
-      const containedStyle = "MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root";
-      const outlinedStyle = "no-wrap MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium css-1rwt2y5-MuiButtonBase-root-MuiButton-root";
-      if (hallData)
+      if (response)
       {
         return (
           <Modal
             open
-            onClose={() => setHallSelection(null)}
+            onClose={refresh}
+            aria-labelledby="booking-response"
+            aria-describedby="booking-response"
+            classes="form-modal"
+        >
+            <Box sx={popUpStyle}>
+                <p>{response}</p>
+                <Button variant="contained" sx={{maxWidth: "40px", minWidth: "40px", margin: "0 auto"}} onClick={() => {setResponse(null); refresh();}} >OK</Button>
+            </Box>
+        </Modal>
+        );
+      }
+      else if (hallData)
+      {
+        return (
+          <Modal
+            open
+            onClose={() => setHallData(null)}
             aria-labelledby="booking-hall-plan"
             aria-describedby="booking-hall-plan"
             classes="form-modal"
@@ -130,41 +147,37 @@ function HallPlanModal({hallSelection, setHallSelection,})
                 <BookingModalContext.Provider value={{ "seatsData": hallData.seats, activeSeat, setActiveSeat}}>
                 {HallPlan}  
                 </BookingModalContext.Provider>
-                <p className="small">Click To Choose Your Seat</p>
+                {<p className="small">{disableBooking ? "Cancel Your Existing Bookings on This Date To Book Here" : "Click To Choose Your Seat"}</p>}
                 {activeSeat &&
                 <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
                     <p className="small no-wrap">Book For</p>
-                    <button className={outlinedStyle} onClick={() => sendBooking("month")} style={{textTransform: "none"}} >Entire Month</button>
-                    <button className={outlinedStyle} onClick={() => sendBooking("week")} style={{textTransform: "none"}}  >Entire Week</button>
-                    <button className={containedStyle} onClick={() => sendBooking("day")} style={{textTransform: "none"}} >Today</button>
+                    <Button variant="outlined" onClick={() => {sendBooking("month");setHallData(null);}} style={{textTransform: "none"}} >Entire Month</Button>
+                    <Button variant="outlined" onClick={() => {sendBooking("week"); setHallData(null);}} style={{textTransform: "none"}}  >Entire Week</Button>
+                    <Button variant="contained"onClick={() => {sendBooking("day");setHallData(null);}} style={{textTransform: "none"}} >Today</Button>
                 </Stack> }
-                {disableBooking && 
-                <button className={outlinedStyle} onClick={cancelBooking}>Cancel Booking</button>
-                }
+                {hallSelection.userBookedOnSlot &&
+                <Button variant="outlined" onClick={cancelBooking}>Cancel Booking</Button>}
             </Box>
           </div>
         </Modal>
         );       
       }
-      else
-      {
-        return (
-            <Modal
-            open
-            onClose={() => setHallSelection(null)}
-            aria-labelledby="booking-hall-plan"
-            aria-describedby="booking-hall-plan"
-            classes="form-modal"
-        >
-            <Box sx={popUpStyle}>
-                loading...
-            </Box>
-        </Modal>
-        )   
-      }
-
-
-
+      // else
+      // {
+      //   return (
+      //       <Modal
+      //       open
+      //       onClose={() => setHallSelection(null)}
+      //       aria-labelledby="booking-hall-plan"
+      //       aria-describedby="booking-hall-plan"
+      //       classes="form-modal"
+      //   >
+      //       <Box sx={popUpStyle}>
+      //           <p>loading...</p>
+      //       </Box>
+      //   </Modal>
+      //   )   
+      // }
 }
 
 export default HallPlanModal;

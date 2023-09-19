@@ -98,7 +98,7 @@ router.post('/:hallName/:seatNum/book', async (req,res) => {
     await user.save()
     .catch(err => res.status(500).send(err));
 
-    res.status(200).send("booking saved");
+    res.status(200).send("Booking Saved");
 })
 
 router.post('/:hallName/:seatNum/cancel', async (req,res) => {
@@ -193,7 +193,7 @@ router.post('/:hallName/:seatNum/cancel', async (req,res) => {
     }
     await hall.save();
     await user.save();
-    res.status(200).send("ok");
+    res.status(200).send("Booking Cancelled");
 })
 
 module.exports = router;

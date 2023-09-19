@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route exact path="/" element={ <Navigate to="/login" /> } />
         <Route path="/login" element={ user ? <Navigate to="/home" /> : < Login setUser={setUser} />} />
-        <Route path="/home" element={ user ? < HomePage user={user} />  : <Navigate to="/login" />  } />
+        <Route path="/home" element={ user ? < HomePage user={user} setUser={setUser} />  : <Navigate to="/login" />  } />
       </Routes>
   )
 }

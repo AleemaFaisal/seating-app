@@ -26,6 +26,7 @@ import { UserContext } from "../contexts/UserContext";
 function BookingTable()
 {
     const [weekNum, setWeekNum] = useState(0);
+    const [refresh, setRefresh] = useState(0);
     const [hallSelection, setHallSelection] = useState(null);
     const [hallsData, setHallsData] = useState(null);
     const [userBookings, setUserBookings] = useState(null);
@@ -33,9 +34,11 @@ function BookingTable()
     const user = useContext(UserContext);
     const today = new Date();
     today.setHours(0,0,0,0);
+    console.log("week: ", weekNum);
 
     
     useEffect(() => {
+          let repeat = refresh;
             let ignore = false;
             const url = BASEURL + "/halls" + "?startDate=" + dates[0] + "&endDate=" + dates[4];
             async function getData () {
@@ -52,9 +55,10 @@ function BookingTable()
             getData();
 
             return () => {ignore=true;};      
-    }, [dates]);
+    }, [dates, refresh]);
 
     useEffect(() => {
+      let repeat = refresh;
       let ignore = false;
       const url = BASEURL + "/user" + "/" + user.email + "/week-bookings?startDate=" + dates[0];
       async function getData () {
@@ -71,7 +75,7 @@ function BookingTable()
       getData();
 
       return () => {ignore=true;};      
-}, [dates]);
+}, [dates, refresh]);
 
     return (
       <Paper className="booking-pane">
@@ -98,7 +102,7 @@ function BookingTable()
             <TableRow>
               <TableCell sx={{background: '#e5e8f1'}}><span className="titles">Hall</span></TableCell>
               {dates.map((date, i) => 
-                  <TableCell align="center" sx={{background: '#e5e8f1'}}> <span className="titles">{date.substr(0,3)}</span> {date.substr(4,6)}</TableCell>
+                  <TableCell align="center" sx={{background: '#e5e8f1'}}><p><span className="titles">{date.substr(0,3)}</span> {date.substr(4,6)}</p> </TableCell>
                 )}
             </TableRow>
           </TableHead>
@@ -109,7 +113,7 @@ function BookingTable()
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row" >
-                  <p className="titles">{hallData[0].hallName}</p>
+                  <span className="titles">{hallData[0].hallName}</span>
                 </TableCell>
                 {hallData.map((dateEntry, dateNum) => {
                   const datePassed = today > new Date(dates[dateNum]);
@@ -119,9 +123,9 @@ function BookingTable()
                   const userBookedOnSlot = userBookings.some(booking => booking.hall == dateEntry.hallName && booking.date == dates[dateNum]);
                   const bgColor = userBookedOnSlot ? "green" : "silver";
                   return (
-                    <TableCell align="center" className={(today.toDateString() == dates[dateNum]) ? "booking-cell today" : "booking-cell"}>
+                    <TableCell key={dateNum} align="center" className={(today.toDateString() == dates[dateNum]) ? "booking-cell today" : "booking-cell"}>
                     <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
-                      <IconButton disabled={datePassed} onClick={() => setHallSelection({"hallName": dateEntry.hallName, "date": dates[dateNum], "disableBooking": userBookedOnSlot})} aria-label="book" color="white" sx={{ color: "white", backgroundColor: bgColor, ':hover': {backgroundColor: '#257CA3'}}}>
+                      <IconButton disabled={datePassed} onClick={() => setHallSelection({"hallName": dateEntry.hallName, "date": dates[dateNum], "disableBooking": userBookedOnDate, userBookedOnSlot})} aria-label="book" color="white" sx={{ color: "white", backgroundColor: bgColor, ':hover': {backgroundColor: '#257CA3'}}}>
                         { datePassed ? <NotInterestedOutlinedIcon /> : <TableRestaurantOutlinedIcon /> }
                       </IconButton>
                       { (!datePassed) ? (userBookedOnDate) ? "View Details" : "Book Seat" : "" }
@@ -137,7 +141,7 @@ function BookingTable()
           </TableBody>
         </Table>
       </div>
-      {hallSelection && <HallPlanModal hallSelection={hallSelection} setHallSelection={setHallSelection} />}
+      {hallSelection && <HallPlanModal hallSelection={hallSelection} setHallSelection={setHallSelection} setRefresh={setRefresh} />}
       </Paper>
     );
 }
