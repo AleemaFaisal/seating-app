@@ -67,15 +67,45 @@ router.post('/:hallName/:seatNum/book', async (req,res) => {
         res.status(400).send("error- user not found");
     }
 
-    const startDate = new Date(startDateString);
-    let endDate;
+    const reqStartDate = new Date(startDateString);
+    let reqEndDate;
     switch(option)
     {
-        case "day": endDate = new Date(startDateString); break;
-        case "week": endDate = new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate() + (5-startDate.getDay())); break;
-        case "month": endDate = new Date(startDate.getFullYear(), startDate.getMonth()+1, 0); break;
+        case "day": reqEndDate = new Date(startDateString); break;
+        case "week": reqEndDate = new Date(reqStartDate.getFullYear(),reqStartDate.getMonth(),reqStartDate.getDate() + (5-reqStartDate.getDay())); break;
+        case "month": reqEndDate = new Date(reqStartDate.getFullYear(), reqStartDate.getMonth()+1, 0); break;
     }
-    const endDateString = endDate.toDateString();
+
+    //find clashing bookings
+    // const seatBookings = hall.seats[seatNum-1].bookings;
+    // let clashes = [];
+    // for (let entry of seatBookings)
+    // {
+    //     let start = new Date(entry.startDate);
+    //     let end = new Date(entry.endDate);
+    //     if (start.getTime() >= reqStartDate.getTime() && start.getTime()<= reqEndDate.getTime())
+    //     {
+    //         clashes.push({entry, "clash": "start"});
+    //     }
+    //     else if (end.getTime() >= reqStartDate.getTime() && end<=reqEndDate.getTime())
+    //     {
+    //         clashes.push({entry, "clash": "end"});
+    //     }
+    // }
+
+    // let clashStart = new Date(clashes[0].entry.startDate);
+    // let clashEnd = new Date(clashes[0].entry.endDate);
+    // let flag = clashes[0].clash;
+    // switch(flag){
+    //         case "start": 
+    //             reqEndDate.setDate(clashStart.getDate()-1);
+    //             break;
+    //         case "end":  
+    //             reqStartDate.setDate(clashEnd.getDate()+1);
+    //             break;
+    // }
+
+    const endDateString = reqEndDate.toDateString();
 
     let booking = {
         username: user.name,
@@ -83,6 +113,8 @@ router.post('/:hallName/:seatNum/book', async (req,res) => {
         endDate: endDateString
     }
 
+    // console.log("booking calculated: ", booking);
+    // res.status(200).send("ok");
     hall.seats[seatNum-1].bookings.push(booking);
     await hall.save()
     .catch(err => res.status(500).send(err));
