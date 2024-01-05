@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://aleemaf28:6ZaAp2KvgA6YSKH@basiccluster.1l0jkqo.mongodb.net/arbisoft-seating?retryWrites=true&w=majority')
+mongoose.connect('dbpath')
 .then(() => console.log("database connected"));
 
 const Team = require('./models/TeamSchema');
